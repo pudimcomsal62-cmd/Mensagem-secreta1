@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <title>Acesso Restrito</title>
+  <style>
+    :root { color-scheme: dark; --blue: #60a5fa; --cyan: #5eead4; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; display: grid; place-items: center;
+      padding: 24px; color: #e5eefb; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: radial-gradient(ellipse at 50% 15%, #12243a 0%, #081321 45%, #030811 100%);
+    }
+    .panel {
+      width: min(100%, 540px); padding: clamp(24px, 6vw, 42px);
+      border: 1px solid #263d58; border-radius: 16px;
+      background: rgba(5, 13, 25, .88); box-shadow: 0 18px 70px #0008;
+    }
+    .icon { color: var(--blue); font-size: 36px; text-align: center; margin-bottom: 14px; }
+    h1 { margin: 0; text-align: center; font-size: clamp(19px, 4vw, 25px); letter-spacing: .16em; font-weight: 600; }
+    .subtitle { text-align: center; color: #91a9c8; font-size: 13px; line-height: 1.7; margin: 14px 0 28px; }
+    label { display: block; color: #9bb3d2; font-size: 12px; margin-bottom: 8px; }
+    input {
+      width: 100%; padding: 14px 15px; border-radius: 8px; border: 1px solid #344d6b;
+      color: #f4f8ff; background: #091626; font: inherit; outline: none;
+    }
+    input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px #60a5fa20; }
+    button {
+      width: 100%; margin-top: 13px; padding: 14px; border-radius: 8px;
+      border: 1px solid #2788ed; background: #0b2b4d; color: #d9ecff;
+      font: inherit; font-size: 13px; letter-spacing: .13em; cursor: pointer;
+    }
+    button:hover { background: #103b65; }
+    .error { min-height: 18px; margin: 12px 0 0; text-align: center; color: #fca5a5; font-size: 12px; }
+    .hidden { display: none; }
+    .success { color: var(--cyan); }
+    .message {
+      margin-top: 24px; padding: 18px; min-height: 120px; border: 1px solid #167e76;
+      border-radius: 10px; background: #041410; color: #e4fff8;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 16px; line-height: 1.85; white-space: pre-wrap; overflow-wrap: anywhere;
+    }
+    .prompt { color: var(--cyan); font-family: ui-monospace, monospace; margin-right: 8px; }
+    .cursor { display: inline-block; width: 8px; height: 1em; vertical-align: -2px; background: var(--cyan); animation: blink 1s steps(2, start) infinite; }
+    @keyframes blink { to { visibility: hidden; } }
+    footer { margin-top: 25px; text-align: center; color: #59718f; font-size: 11px; }
+    @media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <div class="icon" id="lockIcon" aria-hidden="true">♙</div>
+    <h1 id="heading">ACESSO RESTRITO</h1>
+    <p class="subtitle" id="subtitle">Digite a senha para continuar.</p>
+
+    <form id="loginForm">
+      <label for="password">SENHA DE ACESSO</label>
+      <input id="password" name="password" type="password" placeholder="Digite a senha..." autocomplete="off" required>
+      <button type="submit">DESBLOQUEAR</button>
+      <p class="error" id="error" role="alert"></p>
+    </form>
+
+    <section id="reveal" class="hidden" aria-live="polite">
+      <div class="message"><span class="prompt">&gt;</span><span id="typedMessage"></span><span class="cursor" id="cursor"></span></div>
+    </section>
+    <footer>ACESSO PÚBLICO · MENSAGEM ESPECIAL</footer>
+  </main>
+
+  <script>
+    const SECRET = "MELYNA";
+    const message = "Então você conseguiu? Parabéns! Mas você leu as letras pequenas né? Se usar IA vai ter que fazer tudo de novo...Brincadeiras brincadeiras, mas que bom que você conseguiu! Quis fazer seu dia das crianças um pouco mais feliz, espero que Deus abençoe seu dia e toda sua caminhada, você é uma pessoa única e muito rara! Continue sendo essa pessoa alegre, engraçada e fiel a Deus, quero te dizer que, independente do tempo que passe, pra mim você sempre será uma criança, Feliz dia das crianças♥️";
+
+    const form = document.getElementById("loginForm");
+    const input = document.getElementById("password");
+    const error = document.getElementById("error");
+    const reveal = document.getElementById("reveal");
+    const typed = document.getElementById("typedMessage");
+    const cursor = document.getElementById("cursor");
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (input.value.trim().toUpperCase() !== SECRET) {
+        error.textContent = "Senha incorreta. Tente novamente.";
+        input.value = "";
+        input.focus();
+        return;
+      }
+      error.textContent = "";
+      form.classList.add("hidden");
+      reveal.classList.remove("hidden");
+      document.getElementById("heading").textContent = "ACESSO CONCEDIDO";
+      document.getElementById("heading").classList.add("success");
+      document.getElementById("lockIcon").textContent = "♧";
+      document.getElementById("lockIcon").classList.add("success");
+      document.getElementById("subtitle").textContent = "A mensagem foi liberada.";
+      typeMessage();
+    });
+
+    function typeMessage() {
+      let i = 0;
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const delay = reducedMotion ? 0 : 32;
+      function next() {
+        if (i >= message.length) {
+          cursor.classList.add("hidden");
+          return;
+        }
+        typed.textContent += message.charAt(i);
+        i++;
+        setTimeout(next, delay);
+      }
+      next();
+    }
+  </script>
+</body>
+</html>
